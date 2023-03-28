@@ -1,7 +1,10 @@
 package com.xmudronc;
 
 public enum Symbol {
-    EMPTY("  ");
+    EMPTY("    "),
+    BLOCK("████"),
+    T_BLOCK("▀▀▀▀"),
+    B_BLOCK("▄▄▄▄");
 
     public final String value;
 
