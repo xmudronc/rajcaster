@@ -7,6 +7,7 @@ import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
 import org.jline.utils.NonBlockingReader;
 
+import com.xmudronc.renderer.RGB;
 import com.xmudronc.renderer.Renderer;
 import com.xmudronc.renderer.TerminalRenderer;
 
@@ -18,8 +19,8 @@ public class Game {
     private NonBlockingReader reader;
     private Renderer renderer;
     private Map map = new Map();
-    private int[][] buffer1 = new int[runSize.getColumns()][runSize.getRows()*2];
-    private int[][] buffer2 = new int[runSize.getColumns()][runSize.getRows()*2];
+    private RGB[][] buffer1 = new RGB[runSize.getColumns()][runSize.getRows()*2];
+    private RGB[][] buffer2 = new RGB[runSize.getColumns()][runSize.getRows()*2];
     private boolean running = false;
     private double px, py, pdx, pdy, pa;
     private Thread input = new Thread(new Runnable() {
@@ -104,7 +105,7 @@ public class Game {
         Double xo=null, yo=null;
         boolean horFirst;
 
-        buffer1 = new int[runSize.getColumns()][runSize.getRows()*2];
+        buffer1 = new RGB[runSize.getColumns()][runSize.getRows()*2];
         
         ra=FixAng(pa+30); //ray set back 30 degrees
         
@@ -202,18 +203,18 @@ public class Game {
             //draw vertical wall to buffer
             for (int y = 0; y < runSize.getRows()*2; y++) {
                 if (y<lineOff || y>lineOff+lineH) {
-                    buffer1[r][y] = 40;
+                    buffer1[r][y] = new RGB(0, 0, 0);
                     //buffer1[r+1][y] = 40;
                     //buffer1[r+2][y] = 40;
                     //buffer1[r+3][y] = 40;
                 } else {
                     if (horFirst) {
-                        buffer1[r][y] = 41;
+                        buffer1[r][y] = new RGB(41, 0, 0);
                         //buffer1[r+1][y] = 41;
                         //buffer1[r+2][y] = 41;
                         //buffer1[r+3][y] = 41;
                     } else {
-                        buffer1[r][y] = 101;
+                        buffer1[r][y] = new RGB(101, 0, 0);
                         //buffer1[r+1][y] = 101;
                         //buffer1[r+2][y] = 101;
                         //buffer1[r+3][y] = 101;

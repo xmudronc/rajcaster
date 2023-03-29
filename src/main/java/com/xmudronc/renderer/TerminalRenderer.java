@@ -18,26 +18,28 @@ public class TerminalRenderer implements Renderer {
     }
 
     @Override
-    public void init(int[][] buffer1, int[][] buffer2) {
+    public void init(RGB[][] buffer1, RGB[][] buffer2) {
         resizeTerminal(runSize.getColumns(), runSize.getRows());
         for (int x = 1; x < buffer1.length; x++) {
             for (int y = 1; y < buffer1[x].length; y++) {
-                buffer1[x][y] = 41;
-                buffer2[x][y] = 40;
+                buffer1[x][y] = new RGB(41, 0, 0);
+                buffer2[x][y] = new RGB(0, 0, 0);
             }
         }
     }
 
     @Override
-    public void render(int[][] buffer1, int[][] buffer2) {
+    public void render(RGB[][] buffer1, RGB[][] buffer2) {
         for (int x = 0; x < buffer1.length; x+=4) {
             for (int y = 0; y < buffer1[x].length; y+=2) {
-                if (buffer1[x][y]!=buffer2[x][y] || buffer1[x][y+1]!=buffer2[x][y+1]) {
+                if (!buffer1[x][y].equals(buffer2[x][y]) || !buffer1[x][y+1].equals(buffer2[x][y+1])) {
                     System.out.print("\u001B[" + ((y+1)-(y/2)) + ";" + (x+1) + "f");
-                    if (buffer1[x][y]==buffer1[x][y+1]) {
-                        System.out.print("\u001B[" + buffer1[x][y] + "m\u001B[" + (buffer1[x][y]-10) + "m" + Symbol.BLOCK.value + "\u001B[0m");
+                    if (buffer1[x][y].equals(buffer1[x][y+1])) {
+                        System.out.print(buffer1[x][y].getRGB() + Symbol.BLOCK.value + "\u001B[0m");
                     } else {
-                        System.out.print("\u001B[" + buffer1[x][y] + "m\u001B[" + (buffer1[x][y+1]-10) + "m" + Symbol.B_BLOCK.value + "\u001B[0m");
+                        buffer1[x][y].setBgRGB(buffer1[x][y+1]);
+                        System.out.print(buffer1[x][y].getRGB() + Symbol.B_BLOCK.value + "\u001B[0m");
+                        buffer1[x][y].setBgRGB(buffer1[x][y]);
                     }
                 }
             }
