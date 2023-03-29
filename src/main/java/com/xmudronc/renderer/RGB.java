@@ -7,14 +7,34 @@ public class RGB {
     private int bR;
     private int bG;
     private int bB;
+    private boolean opaque;
 
     public RGB(int R, int G, int B) {
-        this.fR = R;
-        this.fG = G;
-        this.fB = B;
-        this.bR = R;
-        this.bG = G;
-        this.bB = B;
+        this.fR = clampValue(R);
+        this.fG = clampValue(G);
+        this.fB = clampValue(B);
+        this.bR = clampValue(R);
+        this.bG = clampValue(G);
+        this.bB = clampValue(B);
+        this.opaque = true;
+    }
+
+    public RGB(int R, int G, int B, boolean opaque) {
+        this.fR = clampValue(R);
+        this.fG = clampValue(G);
+        this.fB = clampValue(B);
+        this.bR = clampValue(R);
+        this.bG = clampValue(G);
+        this.bB = clampValue(B);
+        this.opaque = opaque;
+    }
+
+    private int clampValue(int value) {
+        if (value < 0)
+            return 0;
+        if (value > 255)
+            return 255;
+        return value;
     }
 
     public int getR() {
@@ -27,6 +47,10 @@ public class RGB {
 
     public int getB() {
         return fB;
+    }
+
+    public boolean isOpaque() {
+        return opaque;
     }
 
     public void setBgRGB(RGB rgb) {
