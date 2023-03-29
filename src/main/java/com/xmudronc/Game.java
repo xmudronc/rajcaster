@@ -7,6 +7,8 @@ import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
 import org.jline.utils.NonBlockingReader;
 
+import com.xmudronc.renderer.Layers;
+import com.xmudronc.renderer.RGB;
 import com.xmudronc.renderer.Renderer;
 import com.xmudronc.renderer.TerminalRenderer;
 
@@ -18,8 +20,9 @@ public class Game {
     private NonBlockingReader reader;
     private Renderer renderer;
     private Map map = new Map();
-    private int[][] buffer1 = new int[runSize.getColumns()][runSize.getRows()*2];
-    private int[][] buffer2 = new int[runSize.getColumns()][runSize.getRows()*2];
+    private Layers layers;
+    private RGB[][] buffer1 = new RGB[runSize.getColumns()][runSize.getRows()*2];
+    private RGB[][] buffer2 = new RGB[runSize.getColumns()][runSize.getRows()*2];
     private boolean running = false;
     private double px, py, pdx, pdy, pa;
     private Thread input = new Thread(new Runnable() {
@@ -45,6 +48,7 @@ public class Game {
         public void run() {
             while (running) {
                 fillBuffers();
+                combineLayers();
                 renderer.render(buffer1, buffer2);
                 buffer2 = Arrays.copyOf(buffer1, buffer1.length);
             }
@@ -104,7 +108,7 @@ public class Game {
         Double xo=null, yo=null;
         boolean horFirst;
 
-        buffer1 = new int[runSize.getColumns()][runSize.getRows()*2];
+        buffer1 = new RGB[runSize.getColumns()][runSize.getRows()*2];
         
         ra=FixAng(pa+30); //ray set back 30 degrees
         
@@ -202,18 +206,21 @@ public class Game {
             //draw vertical wall to buffer
             for (int y = 0; y < runSize.getRows()*2; y++) {
                 if (y<lineOff || y>lineOff+lineH) {
-                    buffer1[r][y] = 40;
+                    layers.getLayer(3)[r][y] = new RGB(0, 0, 0, false);
+                    //buffer1[r][y] = new RGB(0, 0, 0);
                     //buffer1[r+1][y] = 40;
                     //buffer1[r+2][y] = 40;
                     //buffer1[r+3][y] = 40;
                 } else {
                     if (horFirst) {
-                        buffer1[r][y] = 41;
+                        layers.getLayer(3)[r][y] = new RGB(41, 0, 0);
+                        //buffer1[r][y] = new RGB(41, 0, 0);
                         //buffer1[r+1][y] = 41;
                         //buffer1[r+2][y] = 41;
                         //buffer1[r+3][y] = 41;
                     } else {
-                        buffer1[r][y] = 101;
+                        layers.getLayer(3)[r][y] = new RGB(101, 0, 0);
+                        //buffer1[r][y] = new RGB(101, 0, 0);
                         //buffer1[r+1][y] = 101;
                         //buffer1[r+2][y] = 101;
                         //buffer1[r+3][y] = 101;
@@ -225,6 +232,27 @@ public class Game {
         }
     }
 
+    private void combineLayers() {
+        //RGB[][] layer1 = layers.getLayer(2);
+        //RGB[][] layer2 = layers.getLayer(2);
+        RGB[][] layer3 = layers.getLayer(3);
+        RGB[][] layer4 = layers.getLayer(4);
+        for (int x = 0; x < buffer1.length; x+=4) {
+            for (int y = 0; y < buffer1[x].length; y++) {
+                buffer1[x][y] = layer4[x][y];
+                if (layer3[x][y].isOpaque()) {
+                    buffer1[x][y] = layer3[x][y];
+                }
+                // if (layer2[x][y].isOpaque()) {
+                //     buffer1[x][y] = layer2[x][y];
+                // }
+                // if (layer1[x][y].isOpaque()) {
+                //     buffer1[x][y] = layer1[x][y];
+                // }
+            }
+        }
+    }
+
     public void run() throws IOException, InterruptedException {
         px=150; 
         py=400; 
@@ -232,8 +260,16 @@ public class Game {
         pdx=Math.cos(Math.toRadians(pa)); 
         pdy=-Math.sin(Math.toRadians(pa)); 
 
+        layers = new Layers(runSize);
         renderer = new TerminalRenderer(startupSize, runSize);
         renderer.init(buffer1, buffer2);
+
+        RGB[][] layer4 = layers.getLayer(4);
+        for (int x = 0; x < layer4.length; x+=4) {
+            for (int y = 0; y < layer4[x].length; y++) {
+                layer4[x][y] = new RGB(0, 128, y<layer4[x].length/2?128:0);
+            }
+        }
 
         running = true;
 
