@@ -106,7 +106,6 @@ public class Game {
         int r,mx,my,mp,dof; 
         double vx,vy,ra,rx,ry,disV,disH; 
         Double xo=null, yo=null;
-        boolean horFirst;
 
         buffer1 = new RGB[runSize.getColumns()][runSize.getRows()*2];
         
@@ -114,8 +113,6 @@ public class Game {
         
         for(r=0;r<runSize.getColumns();r+=4) {
             //---Vertical--- 
-            horFirst=false;
-
             dof=0; 
             disV=100000;
 
@@ -192,7 +189,6 @@ public class Game {
                 rx=vx; 
                 ry=vy; 
                 disH=disV; 
-                horFirst=true;
             }                                      
                 
             double ca=FixAng(pa-ra); 
@@ -212,24 +208,21 @@ public class Game {
                     //buffer1[r+2][y] = 40;
                     //buffer1[r+3][y] = 40;
                 } else {
-                    if (horFirst) {
-                        layers.getLayer(3)[r][y] = new RGB(41, 0, 0);
-                        //buffer1[r][y] = new RGB(41, 0, 0);
-                        //buffer1[r+1][y] = 41;
-                        //buffer1[r+2][y] = 41;
-                        //buffer1[r+3][y] = 41;
-                    } else {
-                        layers.getLayer(3)[r][y] = new RGB(101, 0, 0);
-                        //buffer1[r][y] = new RGB(101, 0, 0);
-                        //buffer1[r+1][y] = 101;
-                        //buffer1[r+2][y] = 101;
-                        //buffer1[r+3][y] = 101;
-                    }
+                    layers.getLayer(3)[r][y] = calculateLights(new RGB(255, 0, 0));
+                    //buffer1[r][y] = new RGB(41, 0, 0);
+                    //buffer1[r+1][y] = 41;
+                    //buffer1[r+2][y] = 41;
+                    //buffer1[r+3][y] = 41;
                 }
             }
 
             ra=FixAng(ra-1);                                                              //go to next ray
         }
+    }
+
+    private RGB calculateLights(RGB rgb) {
+        int lightStrength = 200;
+        return new RGB(rgb.getR() - lightStrength, rgb.getG() - lightStrength, rgb.getB() - lightStrength);
     }
 
     private void combineLayers() {
