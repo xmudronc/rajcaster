@@ -103,9 +103,15 @@ public class Game {
     }
 
     private void fillBuffers() {
-        int r,mx,my,mp,dof; 
+        int r,mx,my,mp,dof,light,lh,lv; 
         double vx,vy,ra,rx,ry,disV,disH; 
         Double xo=null, yo=null;
+
+        light = 240;
+        lh = 240;
+        lv = 240;
+        mx = Integer.MIN_VALUE;
+        my = Integer.MIN_VALUE;
 
         buffer1 = new RGB[runSize.getColumns()][runSize.getRows()*2];
         
@@ -118,12 +124,12 @@ public class Game {
 
             double tan=Math.tan(Math.toRadians(ra));
                 
-            if (Math.cos(Math.toRadians(ra))> 0.001) { //looking left
+            if (Math.cos(Math.toRadians(ra)) > 0.001) { //looking left
                 rx=(((int)px>>6)<<6)+64;      
                 ry=(px-rx)*tan+py; 
                 xo= (double) 64; 
                 yo=-xo*tan;
-            } else if (Math.cos(Math.toRadians(ra))<-0.001) { //looking right
+            } else if (Math.cos(Math.toRadians(ra)) < -0.001) { //looking right
                 rx=(((int)px>>6)<<6) -0.0001; 
                 ry=(px-rx)*tan+py; 
                 xo=(double) -64; 
@@ -134,13 +140,35 @@ public class Game {
                 dof=8;
             }                                                  
 
-            while(dof<8) { 
+            // boolean brk1 = false;
+            // for (int mpx = 0; mpx < map.getMapX(); mpx++)
+            // {                                                 
+            //     for (int mpy = 0; mpy < map.getMapY(); mpy++)
+            //     {       
+            //         if (map.getMap()[mpx][mpy] == 1) { //hit  
+            //             disV=Math.cos(Math.toRadians(ra))*(rx-px)-Math.sin(Math.toRadians(ra))*(ry-py);
+            //             light -= calculateLights(mpx, mpy);
+            //             brk1 = true;
+            //             break;
+            //         } else { //check next horizontal
+            //             rx+=xo; 
+            //             ry+=yo; 
+            //         }   
+            //     }
+            //     if (brk1)
+            //         break;
+            // }
+            // vx=rx; 
+            // vy=ry;
+
+            while(dof<8) {
                 mx=(int)(rx)>>6; 
                 my=(int)(ry)>>6; 
                 mp=my*map.getMapX()+mx;                     
-                if (mp>0 && mp<map.getMapX()*map.getMapY() && map.getMap()[mp]==1) { //hit  
+                if (mp>0 && mp<map.getMapX()*map.getMapY() && map.getMap1D()[mp]==1) { //hit  
                     dof=8; 
                     disV=Math.cos(Math.toRadians(ra))*(rx-px)-Math.sin(Math.toRadians(ra))*(ry-py);
+                    lv -= calculateLights(my, mx);
                 } else { //check next horizontal
                     rx+=xo; 
                     ry+=yo; 
@@ -169,26 +197,47 @@ public class Game {
                 rx=px; 
                 ry=py; 
                 dof=8;
-            }                                                   
+            }   
             
-            while(dof<8) { 
+            // boolean brk2 = false;
+            // for (int mpx = 0; mpx < map.getMapX(); mpx++)
+            // {                                                 
+            //     for (int mpy = 0; mpy < map.getMapY(); mpy++)
+            //     {                        
+            //         if (map.getMap()[mpx][mpy] == 1) { //hit   
+            //             disH=Math.cos(Math.toRadians(ra))*(rx-px)-Math.sin(Math.toRadians(ra))*(ry-py);
+            //             light -= calculateLights(mpx, mpy);
+            //             brk2 = true;
+            //             break;
+            //         } else { //check next horizontal
+            //             rx+=xo; 
+            //             ry+=yo; 
+            //         }   
+            //     }
+            //     if (brk2)
+            //         break;
+            // }
+            
+            while(dof<8) {
                 mx=(int)(rx)>>6; 
                 my=(int)(ry)>>6; 
                 mp=my*map.getMapX()+mx;                          
-                if (mp>0 && mp<map.getMapX()*map.getMapY() && map.getMap()[mp]==1) { //hit   
+                if (mp>0 && mp<map.getMapX()*map.getMapY() && map.getMap1D()[mp]==1) { //hit   
                     dof=8; 
                     disH=Math.cos(Math.toRadians(ra))*(rx-px)-Math.sin(Math.toRadians(ra))*(ry-py);
+                    lh -= calculateLights(my, mx);
                 } else { //check next horizontal
                     rx+=xo; 
                     ry+=yo; 
                     dof+=1;
                 }                                               
             } 
-            
+            light = lh;
             if (disV<disH) { //horizontal hit first
                 rx=vx; 
                 ry=vy; 
                 disH=disV; 
+                light = lv;
             }                                      
                 
             double ca=FixAng(pa-ra); 
@@ -208,7 +257,7 @@ public class Game {
                     //buffer1[r+2][y] = 40;
                     //buffer1[r+3][y] = 40;
                 } else {
-                    layers.getLayer(3)[r][y] = calculateLights(new RGB(255, 0, 0));
+                    layers.getLayer(3)[r][y] = applyLight(new RGB(255, 0, 0), light);
                     //buffer1[r][y] = new RGB(41, 0, 0);
                     //buffer1[r+1][y] = 41;
                     //buffer1[r+2][y] = 41;
@@ -220,9 +269,43 @@ public class Game {
         }
     }
 
-    private RGB calculateLights(RGB rgb) {
-        int lightStrength = 200;
-        return new RGB(rgb.getR() - lightStrength, rgb.getG() - lightStrength, rgb.getB() - lightStrength);
+    private RGB applyLight(RGB rgb, int light) {
+        return new RGB(rgb.getR() - light, rgb.getG() - light, rgb.getB() - light);
+    }
+
+    private int calculateLights(int mpx, int mpy) {
+        //4 x 35
+        //3 x 28
+        //1 x 16
+
+        int light = 0;
+
+        if (isLight(mpx + 1, mpy) || isLight(mpx - 1, mpy) || isLight(mpx, mpy + 1) || isLight(mpx, mpy - 1))
+        {
+            light += 16;
+        }
+
+        if (isLight(mpx + 2, mpy) || isLight(mpx - 2, mpy) || isLight(mpx, mpy + 2) || isLight(mpx, mpy - 2) ||
+        isLight(mpx + 1, mpy + 1) || isLight(mpx + 1, mpy - 1) || isLight(mpx - 1, mpy + 1) || isLight(mpx - 1, mpy - 1))
+        {
+            light += 28;
+        }
+
+        if (isLight(mpx + 2, mpy + 1) || isLight(mpx - 2, mpy + 1) || isLight(mpx + 2, mpy - 1) || isLight(mpx - 2, mpy - 1) ||
+        isLight(mpx + 1, mpy + 2) || isLight(mpx - 1, mpy + 2) || isLight(mpx + 1, mpy - 2) || isLight(mpx - 1, mpy - 2))
+        {
+            light += 35;
+        }
+
+        return light > 240 ? 240 : light;
+    }
+
+    private boolean isLight(int mpx, int mpy) {
+        try {
+            return map.getMap()[mpx][mpy] == 2;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void combineLayers() {
