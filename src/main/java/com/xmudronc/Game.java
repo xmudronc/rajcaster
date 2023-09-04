@@ -7,12 +7,15 @@ import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
 import org.jline.utils.NonBlockingReader;
 
+import com.xmudronc.renderer.FxRenderer;
 import com.xmudronc.renderer.Layers;
 import com.xmudronc.renderer.RGB;
 import com.xmudronc.renderer.Renderer;
-import com.xmudronc.renderer.TerminalRenderer;
+
+import javafx.stage.Stage;
 
 public class Game {
+    private Stage stage;
     private Size startupSize;
     private Size runSize = new Size(120, 32);
     //private Size runSize = new Size(240, 68);
@@ -85,11 +88,12 @@ public class Game {
         }
     }
 
-    public Game(Terminal terminal) {
+    public Game(Terminal terminal, Stage stage) {
         this.terminal = terminal;
         this.terminal.enterRawMode();
         startupSize = terminal.getSize();
         reader = terminal.reader();
+        this.stage = stage;
     }
 
     private double FixAng(double a) { 
@@ -261,7 +265,7 @@ public class Game {
         pdy=-Math.sin(Math.toRadians(pa)); 
 
         layers = new Layers(runSize);
-        renderer = new TerminalRenderer(startupSize, runSize);
+        renderer = new FxRenderer(startupSize, runSize, stage);
         renderer.init(buffer1, buffer2);
 
         RGB[][] layer4 = layers.getLayer(4);
@@ -274,10 +278,10 @@ public class Game {
         running = true;
 
         input.start();
-        render.start();
+        // render.start();
 
         input.join();
-        render.join();
+        // render.join();
 
         renderer.end();
     }
