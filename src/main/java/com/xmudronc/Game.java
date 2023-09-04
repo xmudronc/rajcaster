@@ -7,6 +7,9 @@ import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
 import org.jline.utils.NonBlockingReader;
 
+import com.xmudronc.generator.ProceduralGenerator;
+import com.xmudronc.generator.MapChunk;
+import com.xmudronc.generator.MapStyle;
 import com.xmudronc.renderer.Layers;
 import com.xmudronc.renderer.RGB;
 import com.xmudronc.renderer.Renderer;
@@ -19,7 +22,7 @@ public class Game {
     private Terminal terminal;
     private NonBlockingReader reader;
     private Renderer renderer;
-    private Map map = new Map();
+    private MapChunk map;
     private Layers layers;
     private RGB[][] buffer1 = new RGB[runSize.getColumns()][runSize.getRows()*2];
     private RGB[][] buffer2 = new RGB[runSize.getColumns()][runSize.getRows()*2];
@@ -90,6 +93,7 @@ public class Game {
         this.terminal.enterRawMode();
         startupSize = terminal.getSize();
         reader = terminal.reader();
+        map = new ProceduralGenerator().generateLevel(4, MapStyle.COMPACT);
     }
 
     private double FixAng(double a) { 
@@ -116,6 +120,7 @@ public class Game {
             //---Vertical--- 
             horFirst=false;
 
+            int defaultDof = 18;
             dof=0; 
             disV=100000;
 
@@ -134,15 +139,15 @@ public class Game {
             } else { //looking up or down. no hit  
                 rx=px; 
                 ry=py; 
-                dof=8;
+                dof=defaultDof;
             }                                                  
 
-            while(dof<8) { 
+            while(dof<defaultDof) { 
                 mx=(int)(rx)>>6; 
                 my=(int)(ry)>>6; 
                 mp=my*map.getMapX()+mx;                     
-                if (mp>0 && mp<map.getMapX()*map.getMapY() && map.getMap()[mp]==1) { //hit  
-                    dof=8; 
+                if (mp>0 && mp<map.getMapX()*map.getMapY() && map.getMap1D()[mp]==1) { //hit  
+                    dof=defaultDof; 
                     disV=Math.cos(Math.toRadians(ra))*(rx-px)-Math.sin(Math.toRadians(ra))*(ry-py);
                 } else { //check next horizontal
                     rx+=xo; 
@@ -171,15 +176,15 @@ public class Game {
             } else { //looking straight left or right
                 rx=px; 
                 ry=py; 
-                dof=8;
+                dof=defaultDof;
             }                                                   
             
-            while(dof<8) { 
+            while(dof<defaultDof) { 
                 mx=(int)(rx)>>6; 
                 my=(int)(ry)>>6; 
                 mp=my*map.getMapX()+mx;                          
-                if (mp>0 && mp<map.getMapX()*map.getMapY() && map.getMap()[mp]==1) { //hit   
-                    dof=8; 
+                if (mp>0 && mp<map.getMapX()*map.getMapY() && map.getMap1D()[mp]==1) { //hit   
+                    dof=defaultDof; 
                     disH=Math.cos(Math.toRadians(ra))*(rx-px)-Math.sin(Math.toRadians(ra))*(ry-py);
                 } else { //check next horizontal
                     rx+=xo; 
