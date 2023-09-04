@@ -1,32 +1,29 @@
 package com.xmudronc.renderer;
 
+import java.awt.Color;
+
 public class RGB {
-    private int fR;
-    private int fG;
-    private int fB;
-    private int bR;
-    private int bG;
-    private int bB;
     private boolean opaque;
+    private Color fColor;
+    private Color bColor;
+
 
     public RGB(int R, int G, int B) {
-        this.fR = clampValue(R);
-        this.fG = clampValue(G);
-        this.fB = clampValue(B);
-        this.bR = clampValue(R);
-        this.bG = clampValue(G);
-        this.bB = clampValue(B);
         this.opaque = true;
+        this.fColor = new Color(clampValue(R), clampValue(G), clampValue(B));
+        this.bColor = new Color(clampValue(R), clampValue(G), clampValue(B));
+    }
+
+    public RGB(Color color) {
+        this.opaque = true;
+        this.fColor = color;
+        this.bColor = color;
     }
 
     public RGB(int R, int G, int B, boolean opaque) {
-        this.fR = clampValue(R);
-        this.fG = clampValue(G);
-        this.fB = clampValue(B);
-        this.bR = clampValue(R);
-        this.bG = clampValue(G);
-        this.bB = clampValue(B);
         this.opaque = opaque;
+        this.fColor = new Color(clampValue(R), clampValue(G), clampValue(B));
+        this.bColor = new Color(clampValue(R), clampValue(G), clampValue(B));
     }
 
     private int clampValue(int value) {
@@ -37,16 +34,24 @@ public class RGB {
         return value;
     }
 
+    public Color getFgColor() {
+        return fColor;
+    }
+
+    public Color getBgColor() {
+        return bColor;
+    }
+
     public int getR() {
-        return fR;
+        return fColor.getRed();
     }
 
     public int getG() {
-        return fG;
+        return fColor.getGreen();
     }
 
     public int getB() {
-        return fB;
+        return fColor.getBlue();
     }
 
     public boolean isOpaque() {
@@ -54,13 +59,19 @@ public class RGB {
     }
 
     public void setBgRGB(RGB rgb) {
-        this.bR = rgb.getR();
-        this.bG = rgb.getG();
-        this.bB = rgb.getB();
+        this.bColor = new Color(rgb.getR(), rgb.getG(), rgb.getB());
     }
 
     public String getRGB() {
-        return String.format("\u001B[38;2;%d;%d;%dm\u001B[48;2;%d;%d;%dm", bR, bG, bB, fR, fG, fB);
+        return String.format(
+            "\u001B[38;2;%d;%d;%dm\u001B[48;2;%d;%d;%dm",
+            bColor.getRed(),
+            bColor.getGreen(),
+            bColor.getBlue(),
+            fColor.getRed(),
+            fColor.getGreen(),
+            fColor.getBlue()
+        );
     }
 
     @Override
@@ -71,23 +82,23 @@ public class RGB {
 
         final RGB other = (RGB) obj;
         
-        if (this.fR != other.fR) {
+        if (this.fColor.getRed() != other.fColor.getRed()) {
             return false;
         }
-        if (this.fG != other.fG) {
+        if (this.fColor.getGreen() != other.fColor.getGreen()) {
             return false;
         }
-        if (this.fB != other.fB) {
+        if (this.fColor.getBlue() != other.fColor.getBlue()) {
             return false;
         }
 
-        if (this.bR != other.bR) {
+        if (this.bColor.getRed() != other.bColor.getRed()) {
             return false;
         }
-        if (this.bG != other.bG) {
+        if (this.bColor.getGreen() != other.bColor.getGreen()) {
             return false;
         }
-        if (this.bB != other.bB) {
+        if (this.bColor.getBlue() != other.bColor.getBlue()) {
             return false;
         }
 
@@ -97,12 +108,12 @@ public class RGB {
     @Override
     public int hashCode() {
         return Integer.valueOf(
-            String.valueOf(fR) 
-            + String.valueOf(fG) 
-            + String.valueOf(fB) 
-            + String.valueOf(bR) 
-            + String.valueOf(bG) 
-            + String.valueOf(bB)
+            String.valueOf(fColor.getRed()) 
+            + String.valueOf(fColor.getGreen()) 
+            + String.valueOf(fColor.getBlue()) 
+            + String.valueOf(bColor.getRed()) 
+            + String.valueOf(bColor.getGreen()) 
+            + String.valueOf(bColor.getBlue())
         );
     }
 }

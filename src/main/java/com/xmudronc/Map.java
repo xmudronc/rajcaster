@@ -3,7 +3,7 @@ package com.xmudronc;
 public class Map {
     private int map[][]={          //the map array. Edit to change level but keep the outer walls
         {1,1,1,1,1,1,1,1},
-        {1,0,1,0,0,0,2,1},
+        {1,0,1,0,0,2,0,1},
         {1,0,1,0,0,0,0,1},
         {1,0,1,0,0,0,0,1},
         {1,0,0,0,0,0,0,1},

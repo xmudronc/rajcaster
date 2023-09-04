@@ -1,5 +1,6 @@
 package com.xmudronc;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -103,13 +104,14 @@ public class Game {
     }
 
     private void fillBuffers() {
-        int r,mx,my,mp,dof,light,lh,lv; 
+        int r,mx,my,mp,dof; 
         double vx,vy,ra,rx,ry,disV,disH; 
+        float light,lh,lv;
         Double xo=null, yo=null;
 
-        light = 240;
-        lh = 240;
-        lv = 240;
+        light = 0.9f;
+        lh = 0.9f;
+        lv = 0.9f;
         mx = Integer.MIN_VALUE;
         my = Integer.MIN_VALUE;
 
@@ -168,7 +170,7 @@ public class Game {
                 if (mp>0 && mp<map.getMapX()*map.getMapY() && map.getMap1D()[mp]==1) { //hit  
                     dof=8; 
                     disV=Math.cos(Math.toRadians(ra))*(rx-px)-Math.sin(Math.toRadians(ra))*(ry-py);
-                    lv -= calculateLights(my, mx);
+                    lv = calculateLights(my, mx);
                 } else { //check next horizontal
                     rx+=xo; 
                     ry+=yo; 
@@ -225,7 +227,7 @@ public class Game {
                 if (mp>0 && mp<map.getMapX()*map.getMapY() && map.getMap1D()[mp]==1) { //hit   
                     dof=8; 
                     disH=Math.cos(Math.toRadians(ra))*(rx-px)-Math.sin(Math.toRadians(ra))*(ry-py);
-                    lh -= calculateLights(my, mx);
+                    lh = calculateLights(my, mx);
                 } else { //check next horizontal
                     rx+=xo; 
                     ry+=yo; 
@@ -269,35 +271,37 @@ public class Game {
         }
     }
 
-    private RGB applyLight(RGB rgb, int light) {
-        return new RGB(rgb.getR() - light, rgb.getG() - light, rgb.getB() - light);
+    private RGB applyLight(RGB rgb, float light) {
+        float[] hsb = Color.RGBtoHSB(rgb.getR(), rgb.getG(), rgb.getB(), null);
+        hsb[2] = light;
+        return new RGB(new Color(Color.HSBtoRGB(hsb[0], hsb[1], hsb[2])));
     }
 
-    private int calculateLights(int mpx, int mpy) {
-        //4 x 35
-        //3 x 28
-        //1 x 16
+    private float calculateLights(int mpx, int mpy) {
+        //4 x 13
+        //3 x 10
+        //1 x 8
 
-        int light = 0;
+        float light = 0;
 
         if (isLight(mpx + 1, mpy) || isLight(mpx - 1, mpy) || isLight(mpx, mpy + 1) || isLight(mpx, mpy - 1))
         {
-            light += 16;
+            light += 0.8;
         }
 
         if (isLight(mpx + 2, mpy) || isLight(mpx - 2, mpy) || isLight(mpx, mpy + 2) || isLight(mpx, mpy - 2) ||
         isLight(mpx + 1, mpy + 1) || isLight(mpx + 1, mpy - 1) || isLight(mpx - 1, mpy + 1) || isLight(mpx - 1, mpy - 1))
         {
-            light += 28;
+            light += 1.0;
         }
 
         if (isLight(mpx + 2, mpy + 1) || isLight(mpx - 2, mpy + 1) || isLight(mpx + 2, mpy - 1) || isLight(mpx - 2, mpy - 1) ||
         isLight(mpx + 1, mpy + 2) || isLight(mpx - 1, mpy + 2) || isLight(mpx + 1, mpy - 2) || isLight(mpx - 1, mpy - 2))
         {
-            light += 35;
+            light += 1.3;
         }
 
-        return light > 240 ? 240 : light;
+        return light > 9 ? 9 : light;
     }
 
     private boolean isLight(int mpx, int mpy) {
