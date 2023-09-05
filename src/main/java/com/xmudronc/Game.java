@@ -3,19 +3,18 @@ package com.xmudronc;
 import java.io.IOException;
 import java.util.Arrays;
 
+import javax.swing.SwingUtilities;
+
 import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
 import org.jline.utils.NonBlockingReader;
 
-import com.xmudronc.renderer.FxRenderer;
+import com.xmudronc.renderer.SwingRenderer;
 import com.xmudronc.renderer.Layers;
 import com.xmudronc.renderer.RGB;
 import com.xmudronc.renderer.Renderer;
 
-import javafx.stage.Stage;
-
 public class Game {
-    private Stage stage;
     private Size startupSize;
     private Size runSize = new Size(120, 32);
     //private Size runSize = new Size(240, 68);
@@ -28,7 +27,7 @@ public class Game {
     private RGB[][] buffer2 = new RGB[runSize.getColumns()][runSize.getRows()*2];
     private boolean running = false;
     private double px, py, pdx, pdy, pa;
-    private Thread input = new Thread(new Runnable() {
+    private Runnable input = new Runnable() {
         @Override
         public void run() {
             try {
@@ -45,8 +44,8 @@ public class Game {
                 e.printStackTrace();
             }
         }
-    });
-    private Thread render = new Thread(new Runnable() {
+    };
+    private Runnable render = new Runnable() {
         @Override
         public void run() {
             while (running) {
@@ -56,7 +55,7 @@ public class Game {
                 buffer2 = Arrays.copyOf(buffer1, buffer1.length);
             }
         }
-    });
+    };
     
     private void move(Integer key) throws IOException {
         switch (key) {
@@ -88,12 +87,11 @@ public class Game {
         }
     }
 
-    public Game(Terminal terminal, Stage stage) {
+    public Game(Terminal terminal) {
         this.terminal = terminal;
         this.terminal.enterRawMode();
         startupSize = terminal.getSize();
         reader = terminal.reader();
-        this.stage = stage;
     }
 
     private double FixAng(double a) { 
@@ -265,7 +263,7 @@ public class Game {
         pdy=-Math.sin(Math.toRadians(pa)); 
 
         layers = new Layers(runSize);
-        renderer = new FxRenderer(startupSize, runSize, stage);
+        renderer = new SwingRenderer(startupSize, runSize);
         renderer.init(buffer1, buffer2);
 
         RGB[][] layer4 = layers.getLayer(4);
@@ -277,11 +275,13 @@ public class Game {
 
         running = true;
 
-        input.start();
-        // render.start();
+        Thread inputThread = new Thread(input);
+        inputThread.start();
+        Thread renderThread = new Thread(render);
+        renderThread.start();
 
-        input.join();
-        // render.join();
+        inputThread.join();
+        renderThread.join();
 
         renderer.end();
     }
