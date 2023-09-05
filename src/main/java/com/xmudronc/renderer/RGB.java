@@ -1,5 +1,7 @@
 package com.xmudronc.renderer;
 
+import java.awt.Color;
+
 public class RGB {
     private int fR;
     private int fG;
@@ -61,6 +63,10 @@ public class RGB {
 
     public String getRGB() {
         return String.format("\u001B[38;2;%d;%d;%dm\u001B[48;2;%d;%d;%dm", bR, bG, bB, fR, fG, fB);
+    }
+
+    public Color getColor() {
+        return new Color(fR, fG, fB);
     }
 
     @Override
