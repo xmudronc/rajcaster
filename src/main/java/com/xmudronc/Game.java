@@ -7,10 +7,11 @@ import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
 import org.jline.utils.NonBlockingReader;
 
+import com.xmudronc.renderer.SwingRenderer;
+import com.xmudronc.renderer.TerminalRenderer;
 import com.xmudronc.renderer.Layers;
 import com.xmudronc.renderer.RGB;
 import com.xmudronc.renderer.Renderer;
-import com.xmudronc.renderer.TerminalRenderer;
 
 public class Game {
     private Size startupSize;
@@ -25,7 +26,7 @@ public class Game {
     private RGB[][] buffer2 = new RGB[runSize.getColumns()][runSize.getRows()*2];
     private boolean running = false;
     private double px, py, pdx, pdy, pa;
-    private Thread input = new Thread(new Runnable() {
+    private Runnable input = new Runnable() {
         @Override
         public void run() {
             try {
@@ -42,8 +43,8 @@ public class Game {
                 e.printStackTrace();
             }
         }
-    });
-    private Thread render = new Thread(new Runnable() {
+    };
+    private Runnable render = new Runnable() {
         @Override
         public void run() {
             while (running) {
@@ -53,7 +54,7 @@ public class Game {
                 buffer2 = Arrays.copyOf(buffer1, buffer1.length);
             }
         }
-    });
+    };
     
     private void move(Integer key) throws IOException {
         switch (key) {
@@ -261,7 +262,8 @@ public class Game {
         pdy=-Math.sin(Math.toRadians(pa)); 
 
         layers = new Layers(runSize);
-        renderer = new TerminalRenderer(startupSize, runSize);
+        renderer = new SwingRenderer(runSize);
+        //renderer = new TerminalRenderer(startupSize, runSize);
         renderer.init(buffer1, buffer2);
 
         RGB[][] layer4 = layers.getLayer(4);
@@ -273,11 +275,13 @@ public class Game {
 
         running = true;
 
-        input.start();
-        render.start();
+        Thread inputThread = new Thread(input);
+        inputThread.start();
+        Thread renderThread = new Thread(render);
+        renderThread.start();
 
-        input.join();
-        render.join();
+        inputThread.join();
+        renderThread.join();
 
         renderer.end();
     }
