@@ -4,15 +4,11 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import org.jline.terminal.Size;
-
 public class SwingCanvas extends Canvas {
     private RGB[][] buffer1;
-    private RGB[][] buffer2;
-    private Size runSize;
+    //private RGB[][] buffer2;
 
-    public SwingCanvas(Size runSize) {
-        this.runSize = runSize;
+    public SwingCanvas() {
         setBackground(Color.BLACK);
     }
 
@@ -29,6 +25,6 @@ public class SwingCanvas extends Canvas {
 
     public void setBuffers(RGB[][] buffer1, RGB[][] buffer2) {
         this.buffer1 = buffer1;
-        this.buffer2 = buffer2;
+        //this.buffer2 = buffer2;
     }
 }

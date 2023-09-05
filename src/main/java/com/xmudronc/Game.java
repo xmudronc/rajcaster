@@ -3,13 +3,12 @@ package com.xmudronc;
 import java.io.IOException;
 import java.util.Arrays;
 
-import javax.swing.SwingUtilities;
-
 import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
 import org.jline.utils.NonBlockingReader;
 
 import com.xmudronc.renderer.SwingRenderer;
+import com.xmudronc.renderer.TerminalRenderer;
 import com.xmudronc.renderer.Layers;
 import com.xmudronc.renderer.RGB;
 import com.xmudronc.renderer.Renderer;
@@ -263,7 +262,8 @@ public class Game {
         pdy=-Math.sin(Math.toRadians(pa)); 
 
         layers = new Layers(runSize);
-        renderer = new SwingRenderer(startupSize, runSize);
+        renderer = new SwingRenderer(runSize);
+        //renderer = new TerminalRenderer(startupSize, runSize);
         renderer.init(buffer1, buffer2);
 
         RGB[][] layer4 = layers.getLayer(4);

@@ -1,19 +1,15 @@
 package com.xmudronc.renderer;
- 
-import java.awt.Graphics;
 
 import javax.swing.JFrame;
 
 import org.jline.terminal.Size;
 
 public class SwingRenderer implements Renderer {
-    private Size startupSize;
     private Size runSize;
     private JFrame frame;
     private SwingCanvas canvas;
 
-    public SwingRenderer(Size startupSize, Size runSize) {
-        this.startupSize = startupSize;
+    public SwingRenderer(Size runSize) {
         this.runSize = runSize;
     }
 
@@ -27,7 +23,7 @@ public class SwingRenderer implements Renderer {
         }
 
         frame = new JFrame();//creating instance of JFrame
-        canvas = new SwingCanvas(runSize);
+        canvas = new SwingCanvas();
         canvas.setBuffers(buffer1, buffer2);
         
         frame.add(canvas);
